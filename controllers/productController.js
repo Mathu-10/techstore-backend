@@ -9,6 +9,16 @@ const getAllProducts = async (req, res) => {
     }
 };
 
+const getProductsByCategory = async (req, res) => {
+    try {
+        const { category } = req.params;
+        const products = await Product.find({ category });
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 const createProduct = async (req, res) => {
     try {
         const product = new Product(req.body);
@@ -16,6 +26,16 @@ const createProduct = async (req, res) => {
         res.status(201).json(product);
     } catch (error) {
         res.status(500).json({ message: 'Server error' });
+    }
+};
+
+const createManyProducts = async (req, res) => {
+    try {
+        const products = req.body;
+        const savedProducts = await Product.insertMany(products);
+        res.status(201).json(savedProducts);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
 
@@ -37,4 +57,11 @@ const deleteProduct = async (req, res) => {
     }
 };
 
-module.exports = { getAllProducts, createProduct, updateProduct, deleteProduct };
+module.exports = { 
+    getAllProducts, 
+    getProductsByCategory,
+    createProduct, 
+    createManyProducts,
+    updateProduct, 
+    deleteProduct 
+};
