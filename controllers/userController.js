@@ -12,7 +12,8 @@ const registerUser = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = new User({ username, email, password: hashedPassword });
+        const isAdmin = email === 'admin@techstore.com';
+        const user = new User({ username, email, password: hashedPassword, isAdmin });
         await user.save();
 
         res.status(201).json({ message: 'Registration successful' });
@@ -39,4 +40,27 @@ const deleteUser = async (req, res) => {
     }
 };
 
-module.exports = { registerUser, getAllUsers, deleteUser };
+const updateUserRole = async (req, res) => {
+    try {
+        const { isAdmin } = req.body;
+        console.log('Updating user role:', req.params.id, 'to admin:', isAdmin);
+        
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id, 
+            { isAdmin }, 
+            { new: true }
+        );
+        
+        if (!updatedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        console.log('User updated successfully:', updatedUser);
+        res.json({ message: 'User role updated successfully', user: updatedUser });
+    } catch (error) {
+        console.error('Error updating user role:', error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+module.exports = { registerUser, getAllUsers, deleteUser, updateUserRole };
